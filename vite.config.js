@@ -7,5 +7,5 @@ export default defineConfig({
   server: {
     allowedHosts:true
   },
-  base:process.env.VITE_BASE_PATH || '/Todo-list'
+  base:process.env.VITE_BASE_PATH || './ParkingQR'
 })

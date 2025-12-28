@@ -25,6 +25,7 @@
                         my.alert({
                             content: "Login successful",
                         });
+                        // save token in local storage to keep user logged in
                         localStorage.setItem("token", tokenAfterFitching);
                         if (onLoginSuccess) onLoginSuccess();
                     })

@@ -1,16 +1,33 @@
 <script>
-    let isPayed = $state(false);
-    let parkNmae = $state("")
+    import ParkingDetails from "./ParkingDetails.svelte";
+
+    // "initial" | "details" | "payment"
+    let scanStep = $state("initial");
+    let parkName = $state("");
+
+  
+
     const handleScan = () => {
-        my.scan({
-            type: "qr",
-            success: (res) => {
-                parkNmae = res.code;
-                my.alert({ title: res.code });
-                isPayed = true;
-            },
-        });
+            my.scan({
+                type: "qr",
+                success: (res) => {
+                    parkName = res.code || "Unknown Parking";
+                    scanStep = "details";
+                },
+                fail: (err) => {
+                    my.alert({ content: "Scan failed. Please try again. " +err});
+                },
+           });
+        
     };
+
+    
+
+    function handleBack() {
+        scanStep = "initial";
+        parkName = "";
+    }
+
     function pay() {
         fetch("https://its.mouamle.space/api/payment", {
             method: "POST",
@@ -27,61 +44,42 @@
                         my.alert({
                             content: "Payment successful",
                         });
+                        scanStep = "initial";
                     },
                 });
             })
             .catch((err) => {
                 my.alert({
-                    content: "Payment failed",
+                    content: "Payment failed" + err,
                 });
             });
     }
 </script>
 
 <div class="background">
-    {#if !isPayed}
+    {#if scanStep === "initial"}
         <div class="scan-container">
             <div class="scan-icon">
-                <!-- Simple CSS Scan Visual -->
+                <!-- Simple CSS Scan -->
                 <div class="scan-frame"></div>
                 <div class="scan-line"></div>
             </div>
             <h2 class="title">Scan to Park</h2>
             <p class="subtitle">Quick and easy parking payment</p>
-            <button class="primary-btn" on:click={handleScan}>
+            <button class="primary-btn" onclick={handleScan}>
                 Scan QR Code
             </button>
         </div>
-    {:else if isPayed}
-        <div class="booking-card">
-            <div class="header">
-                <h3>Parking Details</h3>
-            </div>
-
-            <div class="parking-info">
-                <div class="info-item">
-                    <span class="label">Park Name</span>
-                    <span class="value">{parkNmae}</span>
-                </div>
-                <div class="info-item">
-                    <span class="label">Time</span>
-                    <span class="value">02:00 Hrs</span>
-                </div>
-                <div class="divider"></div>
-
-                <div class="info-item total">
-                    <span class="label">Price per day</span>
-                    <span class="value price">$5.00</span>
-                </div>
-            </div>
-
-            <button class="pay-btn" on:click={pay}> Confirm & Pay </button>
-        </div>
+    {:else if scanStep === "details"}
+        <ParkingDetails
+            onPay={pay}
+            parkingName={parkName}
+            onBack={handleBack}
+        />
     {/if}
 </div>
 
 <style>
-    /* Global Container */
     .background {
         height: 100vh;
         width: 100%;
@@ -96,7 +94,6 @@
         box-sizing: border-box;
     }
 
-    /* Typography */
     .title {
         font-size: 1.5rem;
         font-weight: 700;
@@ -109,9 +106,7 @@
         margin-bottom: 2rem;
     }
 
-    /* Buttons */
-    .primary-btn,
-    .pay-btn {
+    .primary-btn {
         width: 100%;
         max-width: 280px;
         padding: 14px 24px;
@@ -131,15 +126,13 @@
             filter 0.2s ease;
     }
 
-    .primary-btn:hover,
-    .pay-btn:hover {
+    .primary-btn:hover {
         transform: translateY(-2px);
         box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);
         filter: brightness(110%);
     }
 
-    .primary-btn:active,
-    .pay-btn:active {
+    .primary-btn:active {
         transform: translateY(0);
     }
 
@@ -159,7 +152,6 @@
         margin-bottom: 24px;
     }
 
-    /* CSS Scan Animation/Graphic */
     .scan-frame {
         width: 100%;
         height: 100%;
@@ -175,7 +167,7 @@
         left: 20px;
         right: 20px;
         height: 5px;
-        background: #f3f4f6; /* Mask to make it look like corners */
+        background: #f3f4f6; 
         z-index: 1;
     }
     .scan-frame::after {
@@ -185,10 +177,10 @@
         left: 20px;
         right: 20px;
         height: 5px;
-        background: #e5e7eb; /* Mask */
+        background: #e5e7eb; 
         z-index: 1;
     }
-    /* Side masks */
+    
     .scan-icon::before {
         content: "";
         position: absolute;
@@ -200,7 +192,7 @@
             circle at top left,
             #f3f4f6,
             #e5e7eb
-        ); /* Match bg approximately */
+        ); 
         z-index: 1;
     }
     .scan-icon::after {
@@ -214,7 +206,7 @@
             circle at top left,
             #f3f4f6,
             #e5e7eb
-        ); /* Match bg */
+        ); 
         z-index: 1;
     }
 
@@ -245,83 +237,12 @@
         }
     }
 
-    /* Booking Card */
-    .booking-card {
-        background: white;
-        width: 100%;
-        max-width: 360px;
-        padding: 30px;
-        border-radius: 24px;
-        box-shadow:
-            0 20px 25px -5px rgba(0, 0, 0, 0.1),
-            0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        display: flex;
-        flex-direction: column;
-        gap: 24px;
-        animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .header h3 {
-        margin: 0;
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: #111827;
-        text-align: center;
-    }
-
-    .parking-info {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-    }
-
-    .info-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .label {
-        font-size: 0.95rem;
-        color: #6b7280;
-    }
-
-    .value {
-        font-size: 1rem;
-        font-weight: 600;
-        color: #374151;
-    }
-
-    .divider {
-        height: 1px;
-        background-color: #f3f4f6;
-        width: 100%;
-        margin: 4px 0;
-    }
-
-    .total .value.price {
-        font-size: 1.25rem;
-        color: #4f46e5;
-        font-weight: 800;
-    }
-
     @keyframes fadeIn {
         from {
             opacity: 0;
         }
         to {
             opacity: 1;
-        }
-    }
-
-    @keyframes slideUp {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
         }
     }
 </style>

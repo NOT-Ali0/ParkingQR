@@ -4,7 +4,10 @@
   import { onMount } from "svelte";
   let isLogin = $state(false);
 
+
+
   onMount(() => {
+    //after we save token in local storage => check if it exists
     if (localStorage.getItem("token")) {
       isLogin = true;
     }
@@ -66,15 +69,13 @@
     z-index: 100;
   }
 
-  /* Add padding to QRscan container to prevent overlap if necessary, 
-     but since we can't easily modify QRscan internal CSS without seeing it, 
-     we rely on main-content layout */
+
 
   .logout-btn {
     padding: 12px 24px;
     font-size: 16px;
     font-weight: 500;
-    background-color: #ef4444; /* Red for logout */
+    background-color: #ef4444; 
     color: white;
     border: none;
     border-radius: 8px;
