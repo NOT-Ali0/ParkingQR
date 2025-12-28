@@ -29,14 +29,8 @@
                         if (onLoginSuccess) onLoginSuccess();
                     })
                     .catch((err) => {
-                        let errorDetails = "";
-                        if (err && typeof err === "object") {
-                            errorDetails = JSON.stringify(err, null, 2);
-                        } else {
-                            errorDetails = String(err);
-                        }
                         my.alert({
-                            content: "Error: " + errorDetails,
+                            content: "Login failed" + err,
                         });
                     });
             },

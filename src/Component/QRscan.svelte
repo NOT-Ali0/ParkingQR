@@ -67,7 +67,6 @@
                     <span class="label">Time</span>
                     <span class="value">02:00 Hrs</span>
                 </div>
-                <!-- Divider -->
                 <div class="divider"></div>
 
                 <div class="info-item total">
